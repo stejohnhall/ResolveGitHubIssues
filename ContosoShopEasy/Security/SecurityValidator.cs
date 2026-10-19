@@ -166,11 +166,11 @@ namespace ContosoShopEasy.Security
             Console.WriteLine($"Admin Password: {ADMIN_PASSWORD}");
             Console.WriteLine($"Session Token Prefix: {SESSION_PREFIX}");
             
-            Console.WriteLine("Input validation: ENABLED (but vulnerable)");
+            Console.WriteLine("Input validation: ENABLED");
             Console.WriteLine("Password encryption: MD5 (WEAK)");
             Console.WriteLine("Credit card storage: FULL NUMBERS (INSECURE)");
             Console.WriteLine("Logging level: DEBUG (EXPOSES SENSITIVE DATA)");
-            Console.WriteLine("SQL injection protection: DISABLED");
+            Console.WriteLine("SQL injection protection: ENABLED");
             Console.WriteLine("XSS protection: MINIMAL");
             
             Console.WriteLine("=== End Vulnerability List ===");

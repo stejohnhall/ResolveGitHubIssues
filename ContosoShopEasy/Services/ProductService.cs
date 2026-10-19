@@ -27,18 +27,54 @@ namespace ContosoShopEasy.Services
             return _productRepository.GetProductsByCategory(categoryId);
         }
 
-        // Vulnerable search method - SQL injection risk
         public List<Product> SearchProducts(string searchTerm)
         {
-            // This simulates a SQL injection vulnerability by directly using user input
-            // In the education context, this would be flagged as a security issue
-            Console.WriteLine($"[DEBUG] Executing search query with term: '{searchTerm}'");
-            
-            // Simulate SQL injection vulnerability by logging dangerous query
-            string simulatedQuery = $"SELECT * FROM Products WHERE Name LIKE '%{searchTerm}%' OR Description LIKE '%{searchTerm}%'";
-            Console.WriteLine($"[DEBUG] SQL Query: {simulatedQuery}");
-            
-            return _productRepository.SearchProducts(searchTerm);
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return new List<Product>();
+
+            var sanitizedSearchTerm = SanitizeSearchTerm(searchTerm);
+            if (string.IsNullOrEmpty(sanitizedSearchTerm))
+                return new List<Product>();
+
+            return _productRepository.SearchProducts(sanitizedSearchTerm);
+        }
+
+        private static string SanitizeSearchTerm(string searchTerm)
+        {
+            var trimmed = searchTerm.Trim();
+            if (trimmed.Length == 0 || trimmed.Length > 100)
+                return string.Empty;
+
+            var normalized = trimmed.Replace("\r", " ").Replace("\n", " ");
+            var lowered = normalized.ToLowerInvariant();
+
+            var prohibitedPatterns = new[]
+            {
+                "--",
+                "/*",
+                "*/",
+                ";",
+                "'" + ";",
+                "union",
+                "select",
+                "drop",
+                "insert",
+                "update",
+                "delete",
+                "alter",
+                "exec",
+                "or 1=1",
+                "sleep(",
+                "benchmark("
+            };
+
+            foreach (var pattern in prohibitedPatterns)
+            {
+                if (lowered.Contains(pattern, StringComparison.Ordinal))
+                    return string.Empty;
+            }
+
+            return normalized;
         }
 
         public List<Product> GetTopRatedProducts(int count = 10)
